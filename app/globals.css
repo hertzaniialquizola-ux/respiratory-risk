@@ -1,26 +1,151 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #005146;
+  --color-on-primary: #ffffff;
+  --color-background: #f4fafd;
+  --color-surface: #f4fafd;
+  --color-surface-container: #e8eff1;
+  --color-surface-container-low: #eef5f7;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e2e9ec;
+  --color-surface-container-highest: #dde4e6;
+  --color-on-surface: #161d1f;
+  --color-on-surface-variant: #3e4946;
+  --color-on-background: #161d1f;
+  --color-outline-variant: #bec9c5;
+  --color-outline: #6e7976;
+  --color-secondary: #29695a;
+  --color-primary-container: #006b5d;
+  --color-on-primary-container: #95e8d6;
+  --color-secondary-container: #adecda;
+  --color-surface-bright: #f4fafd;
+  --color-surface-variant: #dde4e6;
+  --color-error: #ba1a1a;
+  --color-on-secondary: #ffffff;
+
+  --spacing-gutter: 24px;
+  --spacing-margin-desktop: 64px;
+  --spacing-margin-mobile: 16px;
+  --spacing-sm: 8px;
+  --spacing-xs: 4px;
+  --spacing-xl: 40px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-on-background: var(--color-on-background);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-outline: var(--color-outline);
+  --color-secondary: var(--color-secondary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-error: var(--color-error);
+  --color-on-secondary: var(--color-on-secondary);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --spacing-gutter: var(--spacing-gutter);
+  --spacing-margin-desktop: var(--spacing-margin-desktop);
+  --spacing-margin-mobile: var(--spacing-margin-mobile);
+  --spacing-sm: var(--spacing-sm);
+  --spacing-xs: var(--spacing-xs);
+  --spacing-xl: var(--spacing-xl);
+  --spacing-md: var(--spacing-md);
+  --spacing-lg: var(--spacing-lg);
+
+  --font-headline-xl: var(--font-bricolage), sans-serif;
+  --font-headline-lg: var(--font-bricolage), sans-serif;
+  --font-headline-md: var(--font-bricolage), sans-serif;
+  --font-headline-lg-mobile: var(--font-bricolage), sans-serif;
+  --font-body-md: var(--font-inter), sans-serif;
+  --font-body-lg: var(--font-inter), sans-serif;
+  --font-label-sm: var(--font-inter), sans-serif;
+  --font-label-md: var(--font-inter), sans-serif;
+
+  --text-headline-xl: 48px;
+  --text-headline-xl--line-height: 1.1;
+  --text-headline-xl--letter-spacing: -0.02em;
+  --text-headline-xl--font-weight: 800;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-lg-mobile: 28px;
+  --text-headline-lg-mobile--line-height: 1.2;
+  --text-headline-lg-mobile--font-weight: 700;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 1.3;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 1.4;
+  --text-label-sm--letter-spacing: 0.05em;
+  --text-label-sm--font-weight: 500;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 1.4;
+  --text-label-md--letter-spacing: 0.01em;
+  --text-label-md--font-weight: 600;
+
+  --radius-xl: 0.75rem;
+  --radius-lg: 0.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined.icon-fill {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.leaflet-container {
+  z-index: 1;
+  height: 100%;
+  width: 100%;
 }
