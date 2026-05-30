@@ -24,16 +24,6 @@ export default function GetStartedPage() {
             </p>
           </div>
 
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-gutter mb-margin-desktop flex items-start gap-gutter">
-            <span className="material-symbols-outlined text-on-surface-variant mt-[2px]">
-              info
-            </span>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              The Respiratory Risk Assessment Tool is provided as a single-file
-              HTML dashboard for local deployment and institutional use.
-            </p>
-          </div>
-
           <RequestAccessForm />
         </div>
       </div>
