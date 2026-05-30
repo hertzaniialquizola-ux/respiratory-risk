@@ -1,227 +1,149 @@
-import { Fragment } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Cities Covered - Respiratory Risk Assessment",
-};
+type CityStatus = "active" | "inactive";
 
-type CityRow = {
+type City = {
   name: string;
-  region: string;
-  live: boolean;
-  lastSync: string;
-  muted?: boolean;
+  status: CityStatus;
+  href?: string;
 };
 
-type CityGroup = {
-  label: string;
-  cities: CityRow[];
-};
+type FetchState =
+  | { status: "loading" }
+  | { status: "success"; pm10: number }
+  | { status: "error" };
 
-const cityGroups: CityGroup[] = [
-  {
-    label: "National Capital Region (NCR)",
-    cities: [
-      { name: "Manila", region: "Metro Manila", live: true, lastSync: "2 min ago" },
-      {
-        name: "Quezon City",
-        region: "Metro Manila",
-        live: true,
-        lastSync: "Just now",
-      },
-      {
-        name: "Makati City",
-        region: "Metro Manila",
-        live: true,
-        lastSync: "5 min ago",
-      },
-    ],
-  },
-  {
-    label: "Region III (Central Luzon)",
-    cities: [
-      {
-        name: "San Fernando",
-        region: "Pampanga",
-        live: true,
-        lastSync: "12 min ago",
-      },
-      {
-        name: "Angeles City",
-        region: "Pampanga",
-        live: false,
-        lastSync: "Offline",
-        muted: true,
-      },
-    ],
-  },
-  {
-    label: "Region IV-A (CALABARZON)",
-    cities: [
-      { name: "Antipolo", region: "Rizal", live: true, lastSync: "1 min ago" },
-      { name: "Calamba", region: "Laguna", live: true, lastSync: "8 min ago" },
-      {
-        name: "Lucena",
-        region: "Quezon",
-        live: false,
-        lastSync: "Offline",
-        muted: true,
-      },
-    ],
-  },
+const cities: City[] = [
+  { name: "Manila", status: "active", href: "/cities/manila" },
+  { name: "Quezon City", status: "active", href: "/cities/quezon-city" },
+  { name: "Makati", status: "active", href: "/cities/makati" },
+  { name: "Angeles City", status: "inactive" },
+  { name: "Lucena", status: "inactive" },
 ];
 
-function StatusBadge({ live }: { live: boolean }) {
-  if (live) {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-primary/30 rounded-full bg-primary-container/10 text-primary font-label-sm text-label-sm">
-        <span
-          className="material-symbols-outlined text-[16px] text-primary icon-fill"
-        >
-          sensors
-        </span>
-        Live
-      </span>
-    );
-  }
+const activeCities = cities.filter((city) => city.status === "active");
 
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-outline-variant rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
-      <span className="material-symbols-outlined text-[16px]">sensors_off</span>
-      Inactive
-    </span>
-  );
+async function fetchPm10(city: string): Promise<FetchState> {
+  try {
+    const response = await fetch(
+      `/api/air-quality?city=${encodeURIComponent(city)}`,
+    );
+    if (!response.ok) {
+      return { status: "error" };
+    }
+    const data = await response.json();
+    if (typeof data?.pm10 !== "number") {
+      return { status: "error" };
+    }
+    return { status: "success", pm10: data.pm10 };
+  } catch {
+    return { status: "error" };
+  }
 }
 
 export default function CitiesPage() {
+  const [results, setResults] = useState<Record<string, FetchState>>(() =>
+    Object.fromEntries(
+      activeCities.map((city) => [city.name, { status: "loading" } as const]),
+    ),
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all(activeCities.map((city) => fetchPm10(city.name))).then(
+      (states) => {
+        if (cancelled) {
+          return;
+        }
+        setResults(
+          Object.fromEntries(
+            activeCities.map((city, index) => [city.name, states[index]]),
+          ),
+        );
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
-    <main className="flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12 flex flex-col gap-8 md:gap-12 relative">
-      <div className="absolute top-0 right-0 w-full h-full max-h-[600px] bg-gradient-to-bl from-primary-container/10 to-transparent pointer-events-none -z-10 rounded-bl-[100px] opacity-70 blur-3xl" />
-
-      <section className="flex flex-col gap-4 border-b border-outline-variant pb-8">
-        <h1 className="font-headline-lg-mobile md:font-headline-xl text-headline-lg-mobile md:text-headline-xl text-on-background">
-          Supported Coverage Areas
+    <main className="flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-margin-mobile md:py-margin-desktop">
+      <div className="mb-margin-desktop">
+        <h1 className="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-primary mb-sm">
+          Cities Covered
         </h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-[800px]">
-          Review the active deployment zones for the Respiratory Risk Assessment
-          Dashboard across the Philippines. Cities with a &apos;Live&apos; status
-          are currently transmitting real-time Air Quality Index (AQI)
-          telemetry to our central monitoring systems.
+        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
+          Monitoring air quality and respiratory risk across Philippine cities.
         </p>
-      </section>
+      </div>
 
-      <section className="w-full bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-lg">
-        <div className="w-full bg-surface-container-low flex items-center justify-between p-4 border-b border-outline-variant">
-          <div className="flex items-center gap-2 px-2 text-on-surface-variant">
-            <span className="material-symbols-outlined text-[20px]">search</span>
-            <input
-              className="bg-transparent border-none outline-none font-body-md text-body-md w-64 placeholder-on-surface-variant/70 focus:ring-0 text-on-surface"
-              placeholder="Filter by city or region..."
-              type="text"
-              aria-label="Filter cities"
-            />
-          </div>
-          <button
-            type="button"
-            className="flex items-center gap-1 px-3 py-1.5 border border-outline-variant rounded-lg bg-surface-container-highest text-on-surface font-label-md text-label-md hover:bg-surface-bright transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              filter_list
-            </span>
-            Filter
-          </button>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+        {cities.map((city) => {
+          const result =
+            city.status === "active" ? results[city.name] : undefined;
+          const isUnavailable = result?.status === "error";
 
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead className="bg-primary-container/10 border-b border-outline-variant">
-              <tr>
-                <th className="py-4 px-6 font-label-md text-label-md text-primary uppercase tracking-wider w-1/3">
-                  City / Municipality
-                </th>
-                <th className="py-4 px-6 font-label-md text-label-md text-primary uppercase tracking-wider w-1/3">
-                  Region
-                </th>
-                <th className="py-4 px-6 font-label-md text-label-md text-primary uppercase tracking-wider w-1/6">
-                  Telemetry Status
-                </th>
-                <th className="py-4 px-6 font-label-md text-label-md text-primary uppercase tracking-wider w-1/6 text-right">
-                  Last Sync
-                </th>
-              </tr>
-            </thead>
-            <tbody className="font-body-md text-body-md text-on-surface">
-              {cityGroups.map((group) => (
-                <Fragment key={group.label}>
-                  <tr
-                    className="bg-surface-container-high border-b border-outline-variant"
-                  >
-                    <td
-                      colSpan={4}
-                      className="py-2 px-6 font-label-md text-label-md text-on-surface-variant uppercase"
-                    >
-                      {group.label}
-                    </td>
-                  </tr>
-                  {group.cities.map((city, index) => (
-                    <tr
-                      key={city.name}
-                      className={`${
-                        index % 2 === 0
-                          ? "bg-surface-container-lowest"
-                          : "bg-surface-container"
-                      } hover:bg-surface-container-highest transition-colors border-b border-outline-variant`}
-                    >
-                      <td
-                        className={`py-4 px-6 font-semibold ${
-                          city.muted
-                            ? "text-on-surface-variant"
-                            : "text-on-background"
-                        }`}
-                      >
-                        <Link
-                          href={`/cities/${encodeURIComponent(city.name.toLowerCase().replace(/\s+/g, "-"))}`}
-                          className="hover:text-primary transition-colors"
-                        >
-                          {city.name}
-                        </Link>
-                      </td>
-                      <td className="py-4 px-6 text-on-surface-variant">
-                        {city.region}
-                      </td>
-                      <td className="py-4 px-6">
-                        <StatusBadge live={city.live} />
-                      </td>
-                      <td className="py-4 px-6 text-right text-on-surface-variant font-label-sm text-label-sm">
-                        {city.lastSync}
-                      </td>
-                    </tr>
-                  ))}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="bg-surface-container-low border-t border-outline-variant p-4 flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm">
-          <span>Showing 8 of 45 supported cities</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="px-3 py-1.5 border border-outline-variant rounded-lg bg-surface-container hover:bg-surface-container-highest disabled:opacity-50 font-label-md text-label-md"
-              disabled
+          return (
+            <div
+              key={city.name}
+              className="bg-surface border border-outline-variant rounded-xl p-gutter shadow-sm"
             >
-              Previous
-            </button>
-            <button
-              type="button"
-              className="px-3 py-1.5 border border-outline-variant rounded-lg bg-surface-container hover:bg-surface-container-highest font-label-md text-label-md text-on-surface"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </section>
+              <div className="flex items-center justify-between mb-sm">
+                <h2 className="font-headline-md text-headline-md text-on-surface">
+                  {city.name}
+                </h2>
+                {city.status === "inactive" ? (
+                  <span className="px-sm py-xs rounded-full bg-on-surface-variant/10 text-on-surface-variant font-label-sm text-label-sm">
+                    Inactive
+                  </span>
+                ) : isUnavailable ? (
+                  <span className="px-sm py-xs rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+                    Unavailable
+                  </span>
+                ) : (
+                  <span className="px-sm py-xs rounded-full bg-primary/10 text-primary font-label-sm text-label-sm">
+                    Active
+                  </span>
+                )}
+              </div>
+
+              {city.status === "inactive" ? (
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Inactive
+                </p>
+              ) : result?.status === "loading" ? (
+                <div className="h-5 w-32 rounded bg-on-surface-variant/10 animate-pulse" />
+              ) : result?.status === "success" ? (
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  PM10: {result.pm10} μg/m³
+                </p>
+              ) : (
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Data unavailable
+                </p>
+              )}
+
+              {city.href && (
+                <Link
+                  href={city.href}
+                  className="inline-flex items-center gap-xs mt-gutter text-primary font-label-md text-label-md hover:underline"
+                >
+                  View details
+                  <span className="material-symbols-outlined text-base">
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </main>
   );
 }
