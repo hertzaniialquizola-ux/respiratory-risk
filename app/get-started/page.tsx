@@ -1,22 +1,11 @@
 "use client";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { useMemo } from "react";
 import RequestAccessForm from "@/components/RequestAccessForm";
 
 const BACKGROUND_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDMj-53A10tXdEvshp9eo-BtltDw5QaK7Z87Fq3VVbNJFJiq0Ny6esPH3P9ODHF6vOKsBTmHBl0BWWZXdvsco-w0MvRtyAIiM158AUCpiY_e2HqE_fe2yjPNNMRZkc0XU-Ym76OA-X5ubkO1STKamcDG7mGsjoX1creQtdSKcH32-aU4Mex5GueuVfhxcKncz-iFpEwU_Nq1wbqb7yHGVHmD0FnFjD3VtgD2tM7BweFJQEzihteKpKmgQrNs0TtldMj6ylxVOE-_i4D";
 
 export default function GetStartedPage() {
-  const supabase = useMemo((): SupabaseClient | null => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-    if (!url || !key) {
-      return null;
-    }
-    return createClient(url, key);
-  }, []);
-
   return (
     <main
       className="flex-grow flex flex-col justify-center py-margin-mobile md:py-margin-desktop px-margin-mobile md:px-gutter bg-cover bg-center bg-fixed"
