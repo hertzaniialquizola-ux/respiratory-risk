@@ -12,5 +12,15 @@ export const supabase: SupabaseClient | null =
     : createSupabaseClient(supabaseUrl, supabaseKey);
 
 export function createClient(): SupabaseClient {
-  return createSupabaseClient(supabaseUrl, supabaseKey);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? supabaseUrl;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? supabaseKey;
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and " +
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local at the project root.",
+    );
+  }
+
+  return createSupabaseClient(url, key);
 }
