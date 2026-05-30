@@ -35,10 +35,10 @@ async function fetchPm10(city: string): Promise<FetchState> {
       return { status: "error" };
     }
     const data = await response.json();
-    if (typeof data?.pm10 !== "number") {
+    if (typeof data?.average_pm10 !== "number") {
       return { status: "error" };
     }
-    return { status: "success", pm10: data.pm10 };
+    return { status: "success", pm10: data.average_pm10 };
   } catch {
     return { status: "error" };
   }
