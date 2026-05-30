@@ -38,3 +38,7 @@ Only .gov.ph email addresses can register.
 Read node_modules/next/dist/docs/ for App Router conventions.
 This is Next.js 16 — use server components by default, 
 client components only when needed (mark with 'use client').
+
+CRITICAL: Always commit directly to main branch.
+Never create a new branch. Never create a worktree.
+Use: git add . && git commit && git push origin main
