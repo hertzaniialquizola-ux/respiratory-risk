@@ -28,35 +28,44 @@ const RISK_BADGE: Record<CityRiskData["risk_level"], string> = {
   critical: "bg-red-100 text-red-800 border border-red-300",
 };
 
+async function loadScores(): Promise<CityRiskData[]> {
+  const response = await fetch("/api/risk-scores");
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error("Unexpected response shape");
+  }
+  return data as CityRiskData[];
+}
+
 export default function DashboardPage() {
   const [cities, setCities] = useState<CityRiskData[]>([]);
   const [state, setState] = useState<LoadState>("loading");
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
-  const loadData = useCallback(async () => {
-    setState("loading");
-    try {
-      const response = await fetch("/api/risk-scores");
-      if (!response.ok) {
-        setState("error");
-        return;
-      }
-      const data: CityRiskData[] = await response.json();
-      if (!Array.isArray(data)) {
-        setState("error");
-        return;
-      }
-      setCities(data);
-      setLastUpdated(new Date().toLocaleString("en-PH"));
-      setState("success");
-    } catch {
-      setState("error");
-    }
+  // setState only ever runs inside the promise callbacks (never
+  // synchronously), so this is safe to call from an effect.
+  const runFetch = useCallback(() => {
+    loadScores()
+      .then((data) => {
+        setCities(data);
+        setLastUpdated(new Date().toLocaleString("en-PH"));
+        setState("success");
+      })
+      .catch(() => setState("error"));
   }, []);
 
+  // Retry from the error state: re-show the loading view, then re-fetch.
+  const retry = useCallback(() => {
+    setState("loading");
+    runFetch();
+  }, [runFetch]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    runFetch();
+  }, [runFetch]);
 
   // ── Summary stats ──────────────────────────────────────────────
   const citiesMonitored = cities.length;
@@ -87,7 +96,7 @@ export default function DashboardPage() {
           </div>
           <button
             type="button"
-            onClick={loadData}
+            onClick={retry}
             className="bg-primary text-on-primary rounded-full px-lg py-sm font-label-md text-label-md"
           >
             Retry
