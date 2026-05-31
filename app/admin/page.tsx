@@ -5,10 +5,9 @@ import { createClient } from '@/lib/supabase'
 
 type AccessRequest = {
   id: string
-  name: string
+  full_name: string
+  lgu_city: string
   email: string
-  organization: string
-  position: string
   created_at: string
   status: string
 }
@@ -52,7 +51,7 @@ export default function AdminPage() {
 
       const { data, error } = await supabase
         .from('access_requests')
-        .select('id, name, email, organization, position, created_at, status')
+        .select('id, full_name, lgu_city, email, created_at, status')
         .order('created_at', { ascending: false })
 
       if (!active) return
@@ -315,10 +314,9 @@ export default function AdminPage() {
             >
               <thead>
                 <tr>
-                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Full Name</th>
+                  <th style={thStyle}>City</th>
                   <th style={thStyle}>Email</th>
-                  <th style={thStyle}>Organization</th>
-                  <th style={thStyle}>Position</th>
                   <th style={thStyle}>Date</th>
                   <th style={thStyle}>Status</th>
                   <th style={thStyle}>Actions</th>
@@ -329,10 +327,9 @@ export default function AdminPage() {
                   const rowState = rowStates[row.id]
                   return (
                     <tr key={row.id}>
-                      <td style={tdStyle}>{row.name}</td>
+                      <td style={tdStyle}>{row.full_name}</td>
+                      <td style={tdStyle}>{row.lgu_city}</td>
                       <td style={tdStyle}>{row.email}</td>
-                      <td style={tdStyle}>{row.organization}</td>
-                      <td style={tdStyle}>{row.position}</td>
                       <td style={tdStyle}>
                         {new Date(row.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
